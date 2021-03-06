@@ -10,43 +10,39 @@ import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 
 public class SqlUsuarios extends Conexion {
-
-    public boolean login(Usuarios usr) {
-        PreparedStatement ps = null;
+     private static final String SQL_QUERY = "SELECT id, usuario, password, nombre FROM usuarios WHERE id = ?";
+   
+ public Usuarios query(Usuarios usuario) {    
+        Connection conn = null;
+        PreparedStatement stmt = null;
         ResultSet rs = null;
-        Connection con = getConexion();
-
-        String sql = "SELECT id, usuario, password, nombre FROM usuarios WHERE usuario = ? LIMIT 1";
+        int rows = 0;
 
         try {
-            ps = con.prepareStatement(sql);
-            ps.setString(1, usr.getUsuario());
-            rs = ps.executeQuery();
-
-            if (rs.next()) {
-                if (usr.getPassword().equals(rs.getString(3))) {
-                    usr.setId(rs.getInt(1));
-                    usr.setNombre(rs.getString(4));
-                    return true;
-                } else {
-                    return false;
-                }
+            conn = Conexion.getConnection();
+//            System.out.println("Ejecutando query:" + SQL_QUERY);
+            stmt = conn.prepareStatement(SQL_QUERY);
+            stmt.setInt(1, usuario.getId());
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                String cod = rs.getString("id");
+                String nom = rs.getString("usuario");
+                String contra = rs.getString("password");
+                usuario = new Usuarios();
+                usuario.setIdTipo(cod);
+                usuario.setNombre(nom);
+                usuario.setPassword(contra);
+                
+                rows++;
             }
-
-            return false;
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, e.toString());
-            return false;
+        } catch (SQLException ex) {
+            ex.printStackTrace(System.out);
         } finally {
-            try {
-                con.close();
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, e.toString());
-            }
+            Conexion.close(rs);
+            Conexion.close(stmt);
+            Conexion.close(conn);
         }
-    }
-    private Connection getConexion() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return usuario;
     }
 
 }

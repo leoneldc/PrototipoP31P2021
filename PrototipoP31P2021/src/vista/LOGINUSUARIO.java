@@ -108,22 +108,17 @@ public class LOGINUSUARIO extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEntrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntrarActionPerformed
-
-        SqlUsuarios modSql = new SqlUsuarios();
-        Usuarios mod = new Usuarios();
-
-        String pass = new String(txtPassword.getPassword());
-
-        if (!txtUsuario.getText().equals("") && !pass.equals("")) {//COMPARAMOS QUE LOS CAMPOS NO ESTEN VACIOS
-
-            String nuevoPass = Hash.sha1(pass);//DESENCRIPTAMOS LAS CONTRASEÑA
-            mod.setUsuario(txtUsuario.getText());
-            mod.setPassword(nuevoPass);
-            limpiar();
-
-        } else {
-            JOptionPane.showMessageDialog(null, "Debe ingresar sus datos");
-            limpiar();
+                SqlUsuarios loginDAO = new SqlUsuarios();
+                Usuarios loginConsulta = new Usuarios();
+                loginConsulta.setId(Integer.parseInt(txtUsuario.getText()));
+                loginConsulta = loginDAO.query(loginConsulta);
+                String pass = new String(txtPassword.getPassword());
+                String nuevoPass = Hash.sha1(pass);//ENCRIPTAMOS LAS CONTRASEÑA
+        
+        if (nuevoPass.equals(loginConsulta.getPassword())) {
+           formMDI = new CONTENEDOR_MDI();
+            formMDI.setVisible(true);
+            this.setVisible(false);
         }
     }//GEN-LAST:event_btnEntrarActionPerformed
     
